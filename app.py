@@ -9,17 +9,17 @@ def check_login():
         st.session_state.logged_in = False
     
     if not st.session_state.logged_in:
-        st.title("Login to Access Salesforce Einstein Copilot Quiz")
+        st.title("Login to Access Salesforce AI Specialist Quiz")
         
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         
         if st.button("Login"):
             # 硬编码的用户名和密码（仅为示例）
-            if username == "admin" and password == "salesforce123":
+            if username == "admin" and password == "secret123":
                 st.session_state.logged_in = True
                 st.success("Login successful! Redirecting to quiz...")
-                st.rerun()  # 重新运行应用以刷新页面
+                st.rerun()
             else:
                 st.error("Invalid username or password. Please try again.")
         
@@ -182,7 +182,7 @@ def main():
             else:
                 st.error("No questions found in qa.pdf. Please check the PDF format.")
         else:
-            st.success("Data loaded from qa_data.csv.")
+            st.success("Data loaded successfully!")
         st.session_state.qa_pairs = qa_pairs
 
     # 显示题目和选项
@@ -192,7 +192,7 @@ def main():
 
         # 显示选项
         options_list = [opt for opt in data["options"] if opt]
-        selected_answer = st.radio("", options_list, index=None, key=f"radio_{question_id}")
+        selected_answer = st.radio("Select one option:", options_list, index=None, key=f"radio_{question_id}")
 
         # 检查答案并显示结果
         if selected_answer:
