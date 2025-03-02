@@ -151,7 +151,7 @@ def read_qa_from_csv(csv_path: str) -> Dict:
         return {}  # 如果CSV文件不存在，返回空字典
     return qa_pairs
 
-def save_qa_to_csv(qa_pairs: Dict, csv_path: str = "qa_data.csv"):
+def save_qa_to_csv(qa_pairs: Dict, csv_path: str = "ai_specialist.csv"):
     # 保存为CSV文件，结构为：number, question, optionA, optionB, optionC, answer
     with open(csv_path, 'w', newline='', encoding='utf-8') as csv_file:
         writer = csv.writer(csv_file)
@@ -165,22 +165,22 @@ def main():
 
     check_login()
 
-    st.title("Salesforce Einstein Copilot Quiz")
+    st.title("Salesforce AI Specialist Quiz")
 
-    pdf_path = "qa.pdf"
-    csv_path = "qa_data.csv"
+    pdf_path = "ai_specialist.pdf"
+    csv_path = "ai_specialist.csv"
 
     # 初始化session_state
     if "qa_pairs" not in st.session_state:
         qa_pairs = read_qa_from_csv(csv_path)
         if not qa_pairs:
-            st.info("CSV is empty or not found. Extracting data from qa.pdf and filling CSV...")
+            st.info("CSV is empty or not found. Extracting data from ai_specialist.pdf and filling CSV...")
             qa_pairs = extract_qa_from_pdf(pdf_path)
             if qa_pairs:
                 save_qa_to_csv(qa_pairs, csv_path)
-                st.success("Data extracted from qa.pdf and saved to qa_data.csv.")
+                st.success("Data extracted from ai_specialist.pdf and saved to ai_specialist.csv.")
             else:
-                st.error("No questions found in qa.pdf. Please check the PDF format.")
+                st.error("No questions found in ai_specialist.pdf. Please check the PDF format.")
         else:
             st.success("Data loaded successfully!")
         st.session_state.qa_pairs = qa_pairs
