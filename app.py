@@ -74,6 +74,22 @@ def main():
         <style>
         .stButton > button {
             text-align: left;
+            border: 0;
+            background-color: transparent;
+            justify-content: flex-start;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .stButton > button:hover,
+        .stButton > button:active {
+            color: inherit;
+            background-color: rgba(0, 0, 0, 0.1); /* 轻微灰色悬停效果 */
+        }
+        .st-key-btn_selected_A,
+        .st-key-btn_selected_B,
+        .st-key-btn_selected_C,
+        .st-key-btn_selected_D,
+        .st-key-btn_selected_E {
+            background-color: green;
         }
         .st-key-next_button > .stButton {
             text-align: right;
@@ -101,31 +117,55 @@ def main():
     # 判断是否为多选题（根据正确答案数量）
     is_multichoice = len(data["answer"]) > 1
 
-    # 存储用户答案
+    # 存储用户答案和按钮状态
     if f"user_answer_{question_id}" not in st.session_state:
         st.session_state[f"user_answer_{question_id}"] = []
+    if f"button_states_{question_id}" not in st.session_state:
+        st.session_state[f"button_states_{question_id}"] = {}  # 跟踪每个按钮的选中状态
 
-    # 使用按钮显示选项
-    selected_answers: List[str] = st.session_state[f"user_answer_{question_id}"]
-    for option in data["options"]:
-        if st.button(option, key=f"btn_{question_id}_{option}"):
-            if is_multichoice:
-                # 多选：切换选择状态（添加或移除）
-                if option in selected_answers:
-                    selected_answers.remove(option)
-                else:
-                    selected_answers.append(option)
+    def handle_option_click(option: str):
+        selected_answers = st.session_state[f"user_answer_{question_id}"]
+        button_states = st.session_state[f"button_states_{question_id}"]
+        option_letter = option[0]  # 提取选项字母（如 "A"）
+
+        if is_multichoice:
+            # 多选：切换选择状态
+            if option_letter in selected_answers:
+                selected_answers.remove(option_letter)
+                button_states[option] = False
             else:
-                # 单选：只能选择一个选项，清除之前的选择
-                selected_answers = [option] if option not in selected_answers else []
-            st.session_state[f"user_answer_{question_id}"] = selected_answers
-            st.rerun()  # 刷新页面以更新按钮状态
+                selected_answers.append(option_letter)
+                button_states[option] = True
+        else:
+            # 单选：只能选择一个选项，清除之前的选择
+            selected_answers = [option_letter] if option_letter not in selected_answers else []
+            button_states = {opt: opt[0] == option_letter for opt in data["options"]}
 
-    # 显示当前选择（可选，用于用户确认）
-    # if selected_answers:
-    #     st.write(f"Selected: {', '.join(selected_answers)}")
+        st.session_state[f"user_answer_{question_id}"] = selected_answers
+        st.session_state[f"button_states_{question_id}"] = button_states
+        # 移除 st.rerun()，依赖状态更新和 CSS 样式
 
-   # Submit 按钮占一行，全宽
+    # 使用按钮显示选项，并动态应用样式
+    selected_answers: List[str] = st.session_state[f"user_answer_{question_id}"]
+
+    for option in data["options"]:
+        option_letter = option[0]  # 提取选项字母（如 "A"）
+        is_selected = option_letter in selected_answers
+
+        # 动态生成按钮的类名，添加 selected 类如果选中
+        button_class = ""
+        if is_selected:
+            button_class += f"btn_selected_{option_letter}"
+
+        st.button(
+            option,
+            use_container_width=True,
+            key=button_class,
+            on_click=handle_option_click,
+            args=[option]
+        )
+
+    # Submit 按钮占一行，全宽
     if st.button("Submit", type="primary", use_container_width=True, key="submit_button", help="Submit your answer"):
         # 检查答案
         user_answer_letters = sorted([opt[0] for opt in selected_answers])
